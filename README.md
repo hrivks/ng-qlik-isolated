@@ -13,9 +13,9 @@ npm install ng-qlik-isolated
 
 Include the ng-qlik-isolated.js 
 ```HTML
-<!-- qlik-isolated.js --!>
+
 <script src="qlik-isolated.min.js"></script> 
-<!-- angular.js --!>
+
 <script src="ng-qlik-isolated.min.js"></script>
 ```
 anuglar.js and [qlik-isolated.js](https://github.com/hrivks/qlik-isolated) must be loaded first
@@ -26,7 +26,6 @@ angular.module('app', ['ngQlikIsolated']);
 ```
 ***
 ### ngQlikIsolatedService
----
 
 ##### Get qlik object
 ```javascript
@@ -53,10 +52,9 @@ once qlik-isolated.js is loaded, qlikIsolated is available globally. However, to
 ngQlikIsolatedService.qlikIsolated
     
 ```
-***
+
 ### qlikIsolatedObject directive
 ---
-
 ##### Embed a qlik object
 
 ```html
@@ -78,6 +76,8 @@ Apart from `app-id` and `obj` all other attributes are optional
 ```html
 <qlik-isolated-object base-url="http://<qlikserver>:<port>" app-id="My App.qvf" sheet="aBcDeF" />
 ```
+### qlikIsolatedSelectionBar directive
+---
 
 ##### Embed selection bar
 if you have a number of qlik objects and would like a common selection bar say, at the top
