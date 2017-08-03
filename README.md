@@ -32,9 +32,9 @@ angular.module('app', ['ngQlikIsolated']);
 ngQlikIsolatedService
 	.getQlik('http://<qlikserver>:<port>')
     .then(function(qlik){ 
-    	/* qlik object available here */
+			/* qlik object available here */
         }, function(error){
-        /* error info */
+			/* error info */
         })
     
 ```
