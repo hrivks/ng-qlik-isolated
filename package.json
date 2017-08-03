@@ -1,0 +1,35 @@
+{
+  "name": "ng-qlik-isolated",
+  "version": "1.0.0",
+  "description": "Angular wrapper for qlik-isolated.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hrivks/ng-qlik-isolated.git"
+  },
+  "keywords": [
+    "qlik",
+    "qlik-sense",
+    "angular",
+    "qlik-isolated"
+  ],
+  "author": "Hari Vikas Janarthanan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hrivks/ng-qlik-isolated/issues"
+  },
+  "homepage": "https://github.com/hrivks/ng-qlik-isolated#readme",
+  "dependencies": {
+	"angular": "1.x",
+    "qlik-isolated": "^1.0.5"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-uglify": "^3.0.1",
+    "grunt-jsdoc": "^2.1.0",
+    "grunt-string-replace": "^1.3.1"
+  }
+}
