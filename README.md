@@ -30,12 +30,12 @@ angular.module('app', ['ngQlikIsolated']);
 ##### Get qlik object
 ```javascript
 ngQlikIsolatedService
-	.getQlik('http://<qlikserver>:<port>')
-		.then(function(qlik){ 
-			/* qlik object available here */
-        }, function(error){
-			/* error info */
-        })
+    .getQlik('http://<qlikserver>:<port>')
+    .then(function(qlik){ 
+        /* qlik object available here */
+    }, function(error){
+        /* error info */
+    });
     
 ```
 
@@ -85,11 +85,6 @@ if you have a number of qlik objects and would like a common selection bar say, 
 ```HTML
 <qlik-isolated-selection-bar base-url="http://<qlikserver>:<port>" app-id="My App.qvf" />
 ```
-
-### P.S
----
-`#experimental`<br>
-works fine for most basic App API related stuffs. Haven't tested every single App API endpoint though
 
 ### License
 ---
