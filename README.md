@@ -74,7 +74,9 @@ Apart from `app-id` and `obj` all other attributes are optional
 ##### Embed a qlik sheet
 
 ```html
-<qlik-isolated-object base-url="http://<qlikserver>:<port>" app-id="My App.qvf" sheet="aBcDeF" />
+<qlik-isolated-object base-url="http://<qlikserver>:<port>"
+                      app-id="My App.qvf"
+					  sheet="aBcDeF" />
 ```
 ### qlikIsolatedSelectionBar directive
 ---
@@ -83,7 +85,8 @@ Apart from `app-id` and `obj` all other attributes are optional
 if you have a number of qlik objects and would like a common selection bar say, at the top
 
 ```HTML
-<qlik-isolated-selection-bar base-url="http://<qlikserver>:<port>" app-id="My App.qvf" />
+<qlik-isolated-selection-bar base-url="http://<qlikserver>:<port>"
+                             app-id="My App.qvf" />
 ```
 
 ### License
