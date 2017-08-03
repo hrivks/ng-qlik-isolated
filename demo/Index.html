@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>qlik-isolated demo</title>
+    <link rel="stylesheet" href="https://bootswatch.com/paper/bootstrap.min.css" />
+    <!--jquery-->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <!--angular-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.4/angular.min.js" integrity="sha256-jFCqhWdzGFjoG8/SAncY2afI/Xv1TPSWSZrb9dpXQbk=" crossorigin="anonymous"></script>
+    <!--bootstrap-->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <!--qlik-isolated-->
+    <script src="qlik-isolated.min.js"></script>
+    <script src="ng-qlik-isolated.min.js"></script>
+    <!--app-->
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="container" ng-app="app" ng-controller="HomeCtrl as home">
+        <p></p>
+        <div class="jumbotron">
+            <h1>qlik-isolated demo</h1>
+            <p><em>Load Qlik Sense's qlik.js in an isolated, non-conflicting way and embed Qlik Sense objects into your web page</em></p>
+            <p>
+                <a class="btn btn-primary btn" href="https://github.com/hrivks/qlik-isolated" target="_blank">qlik-isolated on GitHub</a>
+                <a class="btn btn-primary btn" href="https://github.com/hrivks/ng-qlik-isolated" target="_blank">ng-qlik-isolated on GitHub</a>
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-xs-11">
+                <input type="text" class="form-control" ng-model="home.baseUrl" placeholder="Enter your Qlik Server URL" />
+            </div>
+            <div class="col-xs-1">
+                <div class="btn form-control btn-default" ng-class="home.baseUrl ? '': 'disabled'" ng-click="home.loadAppList(home.baseUrl)"><span class="glyphicon glyphicon-ok"></span></div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="alert alert-danger" ng-if="home.error">{{home.error}}</div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-xs-3">
+                <div class="well">
+                    <!--App dropdown-->
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle form-control" style="text-align:left" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            {{ home.selectedApp ? home.selectedApp.name : 'Select App' }}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
+                            <li ng-repeat="app in home.apps"><a href="#" ng-click="home.loadSheets(app)">{{app.name}}</a></li>
+                        </ul>
+                    </div> <!--/App dropdown-->
+                    <br />
+                    <!--Sheet list-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Sheets</div>
+                        <div class="list-group">
+                            <a class="list-group-item" 
+                               ng-class="home.selectedSheet == sheet ? 'active' : ''"
+                               ng-repeat="sheet in home.sheets" 
+                               href="#" 
+                               ng-click="home.selectedSheet = sheet"> {{sheet.name}} </a>
+                        </div>
+                    </div><!--/Sheet list-->
+                    <br />
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Objects</div>
+                        <div class="list-group">
+                            <a class="list-group-item"
+                               ng-repeat="obj in home.selectedSheet.objects"
+                               href="#"
+                               ng-click="home.selectedObject = obj">{{obj.name}} - {{obj.type}}</a>
+                        </div>
+                    </div><!--/Sheet list-->
+
+
+
+                </div>
+            </div> <!--/sidebar-->
+            <div class="col-xs-9">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        Basic panel
+                    </div>
+                </div>
+            </div> <!--/sidebar-->
+        </div>
+    </div>
+</body>
+</html>
