@@ -24,9 +24,9 @@ anuglar.js and [qlik-isolated.js](https://github.com/hrivks/qlik-isolated) must 
 ```javascript
 angular.module('app', ['ngQlikIsolated']);
 ```
-***
-### ngQlikIsolatedService
 
+### ngQlikIsolatedService
+---
 ##### Get qlik object
 ```javascript
 ngQlikIsolatedService
