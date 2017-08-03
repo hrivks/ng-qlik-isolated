@@ -31,7 +31,7 @@ angular.module('app', ['ngQlikIsolated']);
 ```javascript
 ngQlikIsolatedService
 	.getQlik('http://<qlikserver>:<port>')
-    .then(function(qlik){ 
+		.then(function(qlik){ 
 			/* qlik object available here */
         }, function(error){
 			/* error info */
