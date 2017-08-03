@@ -87,7 +87,7 @@
                         && attr['disableSelection'] != 'false';
                     var disAni = typeof attr['disableAnimation'] === 'string'
                         && attr['disableAnimation'] != 'false';
-                    var selections = attr['selections']
+                    var selections = attr['selections'] && attr['selections'].split(';');
 
                     ngQlikIsolatedService
                         .qlikIsolated
@@ -118,8 +118,8 @@
                             && attr['disableSelection'] != 'false';
                         var disAni = typeof attr['disableAnimation'] === 'string'
                             && attr['disableAnimation'] != 'false';
-                        var selections = attr['selections']
-
+                        var selections = attr['selections'] && attr['selections'].split(';');
+						
                         ngQlikIsolatedService
                             .qlikIsolated
                             .getSelectionBarIsolated($(element), scope.appId, url, clrSel, disIntr,
