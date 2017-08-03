@@ -44,7 +44,7 @@ ngQlikIsolatedService
 ngQlikIsolatedService.baseUrl('http://<qlikserver>:<port>'); // set
 var currentUrl = ngQlikIsolatedService.baseUrl(); // get
 ```
-only baseUrl is set, `ngQlikIsolatedService.getQlik()` can be called without any parameters
+once baseUrl is set, `ngQlikIsolatedService.getQlik()` can be called without any parameters
 
 ##### Get qlikIsolated object
 once qlik-isolated.js is loaded, qlikIsolated is available globally. However, to get it safely in an angular-ish way,
