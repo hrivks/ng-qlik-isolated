@@ -1,5 +1,5 @@
 ﻿angular.module('app', ['ngQlikIsolated'])
-    .controller('HomeCtrl', ['$q','ngQlikIsolatedService', function ($q, nqi) {
+    .controller('HomeCtrl', ['$q', 'ngQlikIsolatedService', function ($q, nqi) {
 
         /**
          * Qlik config object
@@ -90,6 +90,7 @@
             url += '/';
             var protocol = url.substring(0, url.indexOf('//') + 2);
             url = url.replace(protocol, '');
+            url.replace('//', '/');
 
             var index = url.indexOf(':');
             index = index < 0 ? url.indexOf('/') : index;
@@ -128,15 +129,15 @@
             } catch (e) {
                 def.reject(e);
                 console.log(e);
-                this.error = "Error retrieving list of apps " + JSON.stringify(e);
+                vm.error = "Error retrieving list of apps " + JSON.stringify(e);
             }
             return def.promise;
         }
 
         /**
          * Get list of sheets in the specified app
-         * @param {qAppInfo} appInfo
-         * @param {qlikConfig} [config]
+         * @param {qAppInfo} appInfo qlik app
+         * @param {qlikConfig} [config] qlik configuration object
          * @returns {Promise<qSheetInfo[]>}
          */
         function getSheets(appInfo, config) {
@@ -154,7 +155,8 @@
                             id: value.qInfo.qId,
                             description: value.qData.description,
                             img: value.qData.thumbnail.qStaticContentUrl.qUrl,
-                            objects: [] };
+                            objects: []
+                        };
 
                         $.each(value.qData.cells, function (k, v) {
                             sheet.objects.push({ name: v.name, type: v.type });
@@ -174,13 +176,13 @@
          * @param {string} obj id of the object
          * @return {*}
          */
-        function getObjectProperties(obj){
+        function getObjectProperties(obj) {
             var def = $q.defer();
             try {
                 currentApp.getObjectProperties(obj).then(function (reply) {
                     console.log(reply);
                     def.resolve(reply);
-                }, function(e){
+                }, function (e) {
                     def.reject(e);
                 });
             } catch (e) {
@@ -189,21 +191,39 @@
             return def.promise;
         }
 
+		/**
+		 * Qlik error event listener. Update alert box when received message
+		 * @param {{message: string, code: number}} err Qlik error object
+		 */
+        function onQlikError(err) {
+            console.log('Qlik error occured', err);
+            var def = $q.defer(); // $q to bring e into angular contextual
+            def.resolve(err);
+            def.promise.then(function (e) {
+                vm.error = "Oops! Qlik error occured. Message: " + e.message + ". Code: " + e.code;
+            });
+        }
 
         /**
          * Load list of app from Qlik Sense server
+         * @param {string} url base url of the qlik sense server
          */
         vm.loadAppList = function (url) {
+            if (!url)
+                return;
             vm.loading = true;
             qConfig = createConfig(url);
             window.config = qConfig;
-            console.log('You can access your qlik config object as \'config\'');
-            console.log(window.config);
+            console.log('You can access your qlik config object as \'config\'', config);
 
             nqi.getQlik(url).then(function (q) {
                 qlik = q;
-                console.log('You can access qlik  as \'qlik\'');
+                console.log('You can access qlik  as \'qlik\'', q);
                 window.qlik = q;
+
+                // attach error event handler
+                qlik.setOnError(function (e) { onQlikError(e); });
+
                 // load app list
                 getApps().then(function (a) {
                     vm.apps = a;
@@ -211,19 +231,23 @@
                     vm.loading = false;
                 }, function (e) {
                     console.log(e);
-                    this.error = "Error retrieving list of sheets " + JSON.stringify(e);
+                    vm.error = "Error retrieving list of sheets " + JSON.stringify(e);
                     vm.loading = false;
                 });
 
             }, function (e) {
                 console.log(e);
-                this.error = "Error loading qlik.js. " + JSON.stringify(e);
+                vm.error = "Error loading qlik.js. Make sure Qlik server URL is working. "
+                    + " If you are connecting to Qlik Desktop (http://localhost:4848), "
+                    + " make sure it is open. " + JSON.stringify(e);
                 vm.loading = false;
-            })
+            });
         };
+
 
         /**
          * Load list of sheets in the selected app
+         * @param {qAppInfo} appInfo selected qlik sense app
          */
         vm.loadSheets = function (appInfo) {
             vm.loading = true;
@@ -231,24 +255,24 @@
             getSheets(appInfo).then(function (sheets) {
                 vm.sheets = sheets;
                 vm.selectedSheet = vm.sheets[0];
-                if(vm.selectedSheet)
+                if (vm.selectedSheet)
                     vm.loadSheetProperties(vm.selectedSheet);
                 vm.loading = false;
             }, function (e) {
                 console.log(e);
-                this.error = "Error retrieving list of objects in sheet " + JSON.stringify(e);
+                vm.error = "Error retrieving list of objects in sheet " + JSON.stringify(e);
                 vm.loading = true;
             });
         };
 
         /**
          * Load properties of object
-         * @param obj {qObject}
+         * @param {qObject} obj 
          */
         vm.loadObjectProperties = function (obj) {
             vm.loading = true;
-            vm.selectedObject=obj;
-            getObjectProperties(obj.name).then(function(d){
+            vm.selectedObject = obj;
+            getObjectProperties(obj.name).then(function (d) {
                 var title = (typeof d.properties.title === 'string') ?
                     d.properties.title : d.properties.visualization;
                 vm.displayItem = {};
@@ -259,14 +283,14 @@
                 vm.loading = false;
             }, function (e) {
                 console.log(e);
-                this.error = "Error retrieving object properties " + obj +'. ' + JSON.stringify(e);
+                vm.error = "Error retrieving object properties " + obj + '. ' + JSON.stringify(e);
                 vm.loading = false;
             });
         };
 
         /**
          * Load properties of sheet
-         * @param sheet {qSheetInfo}
+         * @param {qSheetInfo} sheet qlik sheet info object
          */
         vm.loadSheetProperties = function (sheet) {
             vm.selectedSheet = sheet;
@@ -281,9 +305,9 @@
 
         /**
          * Embed the given object in the web page
-         * @param obj {qObject}
+         * @param {qObject} obj
          */
-        vm.embedObject = function(obj){
+        vm.embedObject = function (obj) {
             var toEmbed = {
                 title: obj.title,
                 id: obj.id,
@@ -300,7 +324,7 @@
         /**
          * Embed a selection bar
          */
-        vm.addSelectionBar = function(){
+        vm.addSelectionBar = function () {
             var toEmbed = {
                 title: 'selection bar',
                 appId: currentApp.id,
@@ -310,5 +334,5 @@
                 isSelectionBar: true
             };
             vm.embeddedObjects.push(toEmbed);
-        }
+        };
     }]);
