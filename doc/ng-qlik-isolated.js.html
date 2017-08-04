@@ -29,7 +29,7 @@
             <pre class="prettyprint source linenums"><code>/**
  * @fileOverview qlik-isolated.js : Angular wrapper for qlik-isolated.js
  * @author Hari Vikas Janarthanan | hrivks@gmail.com | https://github/hrivks
- * @version 1.0.0
+ * @version 1.0.2
  * @license MIT
  */
 
@@ -67,7 +67,7 @@
                     url: qlikServerBaseUrl,
                     prefix: prefix
                 };
-            }
+            };
 
             /**
              * Get Qlik object
@@ -76,13 +76,13 @@
              * @returns {Promise} resolved when qlik is successfuly loaded
              */
             this.getQlik = function (baseUrl, prefix) {
-                var url = baseUrl || qlikServerBaseUrl;
-                var prefx = prefix || qlikServerPrefix;
-                if (!url)
+                baseUrl = baseUrl || qlikServerBaseUrl;
+                prefix = prefix || qlikServerPrefix;
+                if (!baseUrl)
                     throw 'nq-qlik-isolated: Base URL of the qlik server is required.'
                     + ' To globally set base url, use ngQlikIsolatedService.baseUrl(&lt;url>) method';
                 var def = $q.defer();
-                this.qlikIsolated.getQlik(url, prefix).then(function (q) {
+                this.qlikIsolated.getQlik(baseUrl, prefix).then(function (q) {
                     def.resolve(q);
                 }, function (e) {
                     def.reject(e);
@@ -97,25 +97,31 @@
                     baseUrl: '@',
                     appId: '@',
                     obj: '@',
-                    sheet: '@'
+                    sheet: '@',
+                    showSelectionBar: '@',
+                    clearSelection : '@',
+                    disableInteraction: '@',
+                    disableSelection: '@',
+                    disableAnimation: '@',
+                    selections : '@'
                 },
-                link: function (scope, element, attr) {
+                link: function (scope, element) {
                     var url = scope.baseUrl || ngQlikIsolatedService.baseUrl().url;
                     if (!url)
                         throw 'nq-qlik-isolated: Base URL of the qlik server is required'
                         + 'To globally set baseUrl, use ngQlikIsolatedService.baseUrl(&lt;url>)';
 
-                    var selBar = typeof attr['showSelectionBar'] === 'string'
-                        &amp;&amp; attr['showSelectionBar'] != 'false';
-                    var clrSel = typeof attr['clearSelection'] === 'string'
-                        &amp;&amp; attr['clearSelection'] != 'false';
-                    var disIntr = typeof attr['disableInteraction'] === 'string'
-                        &amp;&amp; attr['disableInteraction'] != 'false';
-                    var disSel = typeof attr['disableSelection'] === 'string'
-                        &amp;&amp; attr['disableSelection'] != 'false';
-                    var disAni = typeof attr['disableAnimation'] === 'string'
-                        &amp;&amp; attr['disableAnimation'] != 'false';
-                    var selections = attr['selections'] &amp;&amp; attr['selections'].split(';');
+                    var selBar = typeof scope.showSelectionBar === 'string'
+                        &amp;&amp; scope.showSelectionBar !== 'false';
+                    var clrSel = typeof scope.clearSelection === 'string'
+                        &amp;&amp; scope.clearSelection !== 'false';
+                    var disIntr = typeof scope.disableInteraction === 'string'
+                        &amp;&amp; scope.disableInteraction !== 'false';
+                    var disSel = typeof scope.disableSelection === 'string'
+                        &amp;&amp; scope.disableSelection !== 'false';
+                    var disAni = typeof scope.disableAnimation === 'string'
+                        &amp;&amp; scope.disableAnimation !== 'false';
+                    var selections = scope.selections &amp;&amp; scope.selections.split(';');
 
                     ngQlikIsolatedService
                         .qlikIsolated
@@ -130,23 +136,28 @@
                     restrict: 'AE',
                     scope: {
                         baseUrl: '@',
-                        appId: '@'
+                        appId: '@',
+                        clearSelection : '@',
+                        disableInteraction: '@',
+                        disableSelection: '@',
+                        disableAnimation: '@',
+                        selections : '@'
                     },
-                    link: function (scope, element, attr) {
+                    link: function (scope, element) {
                         var url = scope.baseUrl || ngQlikIsolatedService.baseUrl().url;
                         if (!url)
                             throw 'nq-qlik-isolated: Base URL of the qlik server is required'
                             + 'To globally set base url, use ngQlikIsolatedService.baseUrl(&lt;url>)';
 
-                        var clrSel = typeof attr['clearSelection'] === 'string'
-                            &amp;&amp; attr['clearSelection'] != 'false';
-                        var disIntr = typeof attr['disableInteraction'] === 'string'
-                            &amp;&amp; attr['disableInteraction'] != 'false';
-                        var disSel = typeof attr['disableSelection'] === 'string'
-                            &amp;&amp; attr['disableSelection'] != 'false';
-                        var disAni = typeof attr['disableAnimation'] === 'string'
-                            &amp;&amp; attr['disableAnimation'] != 'false';
-                        var selections = attr['selections'] &amp;&amp; attr['selections'].split(';');
+                        var clrSel = typeof scope.clearSelection === 'string'
+                            &amp;&amp; scope.clearSelection !== 'false';
+                        var disIntr = typeof scope.disableInteraction === 'string'
+                            &amp;&amp; scope.disableInteraction !== 'false';
+                        var disSel = typeof scope.disableSelection === 'string'
+                            &amp;&amp; scope.disableSelection !== 'false';
+                        var disAni = typeof scope.disableAnimation === 'string'
+                            &amp;&amp; scope.disableAnimation !== 'false';
+                        var selections = scope.selections &amp;&amp; scope.selections.split(';');
 						
                         ngQlikIsolatedService
                             .qlikIsolated
@@ -171,7 +182,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Thu Aug 03 2017 12:25:33 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.3</a> on Fri Aug 04 2017 01:20:02 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

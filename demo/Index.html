@@ -1,95 +1,222 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>qlik-isolated demo</title>
-    <link rel="stylesheet" href="https://bootswatch.com/paper/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://bootswatch.com/paper/bootstrap.min.css"/>
     <!--jquery-->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"
             integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
             crossorigin="anonymous"></script>
     <!--angular-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.4/angular.min.js" integrity="sha256-jFCqhWdzGFjoG8/SAncY2afI/Xv1TPSWSZrb9dpXQbk=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.4/angular.min.js"
+            integrity="sha256-jFCqhWdzGFjoG8/SAncY2afI/Xv1TPSWSZrb9dpXQbk="
+            crossorigin="anonymous"></script>
     <!--bootstrap-->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
     <!--qlik-isolated-->
-    <script src="qlik-isolated.min.js"></script>
-    <script src="ng-qlik-isolated.min.js"></script>
+    <script src="../node_modules/qlik-isolated/qlik-isolated.min.js"></script>
+    <script src="../ng-qlik-isolated.min.js"></script>
     <!--app-->
     <script src="app.js"></script>
 </head>
 <body>
-    <div class="container" ng-app="app" ng-controller="HomeCtrl as home">
-        <p></p>
-        <div class="jumbotron">
-            <h1>qlik-isolated demo</h1>
-            <p><em>Load Qlik Sense's qlik.js in an isolated, non-conflicting way and embed Qlik Sense objects into your web page</em></p>
-            <p>
-                <a class="btn btn-primary btn" href="https://github.com/hrivks/qlik-isolated" target="_blank">qlik-isolated on GitHub</a>
-                <a class="btn btn-primary btn" href="https://github.com/hrivks/ng-qlik-isolated" target="_blank">ng-qlik-isolated on GitHub</a>
-            </p>
+<div class="container" ng-app="app" ng-controller="HomeCtrl as home">
+    <div class="jumbotron" style="margin-top:15px;">
+        <h1>qlik-isolated demo</h1>
+        <p><em>Load Qlik Sense's qlik.js in an isolated, non-conflicting way and embed Qlik Sense
+            objects into your web page</em></p>
+        <p>
+            <a class="btn btn-primary btn" href="https://github.com/hrivks/qlik-isolated"
+               target="_blank">qlik-isolated on GitHub</a>
+            <a class="btn btn-primary btn" href="https://github.com/hrivks/ng-qlik-isolated"
+               target="_blank">ng-qlik-isolated on GitHub</a>
+        </p>
+    </div>
+    <div ng-show="home.loading"
+         class="progress progress-striped active"
+         style="height:10px; margin-top:-30px">
+        <div class="progress-bar" style="width: 100%;"></div>
+    </div>
+    <!-- URL input -->
+    <div class="row">
+        <div class="col-xs-11">
+            <input type="text" class="form-control" ng-model="home.baseUrl"
+                   placeholder="Enter your Qlik Server URL"/>
         </div>
-        <div class="row">
-            <div class="col-xs-11">
-                <input type="text" class="form-control" ng-model="home.baseUrl" placeholder="Enter your Qlik Server URL" />
+        <div class="col-xs-1">
+            <div class="btn form-control btn-default" ng-class="home.baseUrl ? '': 'disabled'"
+                 ng-click="home.loadAppList(home.baseUrl)"><span
+                    class="glyphicon glyphicon-ok"></span></div>
+        </div>
+        <div class="col-xs-12">
+            <button class="btn btn-link btn-sm"
+                    ng-click="home.baseUrl = 'http://localhost:4848'; home.loadAppList(home.baseUrl)">
+                <small>I use Qlik Sense Desktop</small>
+            </button>
+        </div>
+    </div> <!--/ URL input -->
+    <br/>
+    <!-- alert -->
+    <div class="alert alert-danger" ng-if="home.error">{{home.error}}</div>
+    <!-- /alert -->
+
+    <div class="alert alert-success alert-dismissible" ng-if="home.qlikLoaded">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        <p class="small text-center"> Qlik.js has been loaded! Check browser console
+            (F12) to
+            play around with Qlik App API.
+            You can access qlik object as <code>qlik</code> and your qlik config
+            object as <code>config</code>
+        </p>
+    </div> <!-- /alert -->
+
+    <div class="row" ng-show="home.qlikLoaded">
+        <div class="col-xs-3">
+            <div class="well">
+                <!--App dropdown-->
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle form-control"
+                            style="text-align:left" type="button" id="appDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {{ home.selectedApp ? home.selectedApp.name : 'Select App' }}
+                        <span class="caret pull-right" style="margin-top:10px"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
+                        <li ng-repeat="app in home.apps"><a href="#"
+                                                            ng-click="home.loadSheets(app)">{{app.name}}</a>
+                        </li>
+                    </ul>
+                </div> <!--/App dropdown-->
+                <br/>
+                <!--sheet dropdown-->
+                <div class="dropdown" ng-show="home.selectedApp">
+                    <button class="btn btn-default dropdown-toggle form-control"
+                            style="text-align:left" type="button" id="sheetDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        <span class="caret pull-right" style="margin-top:10px"></span>
+                        <span class="pull-left"> {{ home.selectedSheet ? home.selectedSheet.name : 'Select Sheet' }}</span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
+                        <li ng-repeat="sheet in home.sheets"><a href="#"
+                                                                ng-click="home.loadSheetProperties(sheet)">{{sheet.name}}</a>
+                        </li>
+                    </ul>
+                </div> <!--/App dropdown-->
+                <br/>
+                <!--Object dropdown-->
+                <div class="dropdown" ng-show="home.selectedSheet">
+                    <button class="btn btn-default dropdown-toggle form-control"
+                            style="text-align:left" type="button" id="objectDropdown"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {{ home.selectedObject ? home.selectedObject.name + ' (' +
+                        home.selectedObject.type + ')' : 'Select Object' }}
+                        <span class="caret pull-right" style="margin-top:10px"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
+                        <li ng-repeat="obj in home.selectedSheet.objects">
+                            <a href="#" ng-click="home.loadObjectProperties(obj)">
+                                {{obj.type}} ({{obj.name}})
+                            </a>
+                        </li>
+                    </ul>
+                </div> <!--/Object dropdown-->
+
             </div>
-            <div class="col-xs-1">
-                <div class="btn form-control btn-default" ng-class="home.baseUrl ? '': 'disabled'" ng-click="home.loadAppList(home.baseUrl)"><span class="glyphicon glyphicon-ok"></span></div>
-            </div>
-        </div>
-        <br />
-        <div class="row">
-            <div class="alert alert-danger" ng-if="home.error">{{home.error}}</div>
-        </div>
-        <br />
-        <div class="row">
-            <div class="col-xs-3">
-                <div class="well">
-                    <!--App dropdown-->
-                    <div class="dropdown">
-                        <button class="btn btn-default dropdown-toggle form-control" style="text-align:left" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                            {{ home.selectedApp ? home.selectedApp.name : 'Select App' }}
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
-                            <li ng-repeat="app in home.apps"><a href="#" ng-click="home.loadSheets(app)">{{app.name}}</a></li>
-                        </ul>
-                    </div> <!--/App dropdown-->
-                    <br />
-                    <!--Sheet list-->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Sheets</div>
-                        <div class="list-group">
-                            <a class="list-group-item" 
-                               ng-class="home.selectedSheet == sheet ? 'active' : ''"
-                               ng-repeat="sheet in home.sheets" 
-                               href="#" 
-                               ng-click="home.selectedSheet = sheet"> {{sheet.name}} </a>
+        </div> <!--/sidebar-->
+        <!--content-->
+        <div class="col-xs-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p ng-hide="home.displayItem" class="text-center">
+                        <em>
+                            select a sheet or an object to embed it
+                        </em>
+                    </p>
+                    <!-- properties display -->
+                    <div class="well well-sm" ng-show="home.displayItem">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <h4>{{home.displayItem.title}}</h4>
+                                <p>{{home.displayItem.description}}</p>
+                                <h5>
+                                    <span class="label label-primary">{{home.displayItem.type}}</span>
+                                    <span class="label label-default">#{{home.displayItem.id}}</span>
+                                </h5>
+                            </div>
+                            <div class="col-xs-3" ng-show="home.displayItem.img">
+                                <img ng-src="{{home.displayItem.img}}" class="img-thumbnail">
+                            </div>
                         </div>
-                    </div><!--/Sheet list-->
-                    <br />
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Objects</div>
-                        <div class="list-group">
-                            <a class="list-group-item"
-                               ng-repeat="obj in home.selectedSheet.objects"
-                               href="#"
-                               ng-click="home.selectedObject = obj">{{obj.name}} - {{obj.type}}</a>
+                        <br/>
+                        <div class="row">
+                            <div class="col-xs-6 col-xs-push-3">
+                                <button class="btn btn-lg btn-success form-control"
+                                        ng-click="home.embedObject(home.displayItem)">
+                                    <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                                    <span>embed this</span>
+                                </button>
+                            </div>
                         </div>
-                    </div><!--/Sheet list-->
-
-
-
+                        <div class="row">
+                            <div class="col-xs-12 text-right">
+                                <small>
+                                <input type="checkbox"
+                                       ng-model="home.showSelectionBar"/> with selection bar
+                                </small>
+                            </div>
+                        </div>
+                    </div><!-- /properties display -->
                 </div>
-            </div> <!--/sidebar-->
-            <div class="col-xs-9">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        Basic panel
+            </div>
+            <!-- add selection bar link -->
+            <div ng-show="home.selectedApp">
+                <div class="btn btn-link" ng-click="home.addSelectionBar()">add selection bar</div>
+            </div><!-- /add selection bar link -->
+            <!-- embed container -->
+            <div id="embedContainer">
+                <div ng-repeat="e in home.embeddedObjects | orderBy:'-'"
+                     class="panel panel-default">
+                    <div class="panel-heading">
+                        <span>{{e.title}}</span>
+                        <span class="pull-right">
+                            <span class="label label-primary">{{e.type}}</span>
+                            <span class="label label-default">#{{e.id}}</span>
+                        </span>
+                    </div>
+                    <div class="panel-body" style="overflow: hidden"
+                         ng-style="e.isSelectionBar ? {'height': '120px'} : {'height':'450px'} "
+                         style="height: 500px">
+                        <qlik-isolated-object
+                                ng-if="e.isSheet && !e.isSelectionBar"
+                                base-url="{{home.baseUrl}}"
+                                app-id="{{e.appId}}"
+                                sheet="{{e.id}}"
+                                show-selection-bar="{{e.showSelectionBar}}">
+                        </qlik-isolated-object>
+
+                        <qlik-isolated-object
+                                ng-if="e.isObject"
+                                base-url="{{home.baseUrl}}"
+                                app-id="{{e.appId}}"
+                                obj="{{e.id}}"
+                                show-selection-bar="{{e.showSelectionBar}}">
+                        </qlik-isolated-object>
+
+                        <qlik-isolated-selection-bar
+                                ng-if="e.isSelectionBar"
+                                base-url="{{home.baseUrl}}"
+                                app-id="{{e.appId}}">
+                        </qlik-isolated-selection-bar>
                     </div>
                 </div>
-            </div> <!--/sidebar-->
-        </div>
+            </div><!--/embed container -->
+        </div> <!--/content-->
     </div>
+</div>
+<div style="height:30px;width:100%;"></div>
 </body>
 </html>

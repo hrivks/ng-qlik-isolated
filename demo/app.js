@@ -21,6 +21,9 @@
          * Qlik sheet information in an app
          * @typedef {Object} qSheetInfo
          * @property {string} name name of the sheet
+         * @property {string} description description of the object
+         * @property {string} id id of the sheet
+         * @property {string} img url of the sheet image
          * @property {qObject[]} objects list of objects in the sheet
          */
 
@@ -29,6 +32,16 @@
          * @typedef {Object} qObject
          * @property {string} name name (id) of the object
          * @property {string} type type of the object
+         */
+
+        /**
+         * Object properties to be displayed
+         * @typedef {Object} dispObj
+         * @property {string} title title of the object
+         * @property {string} description description of the object
+         * @property {string} type type of the object
+         * @property {string} id id of the object
+         * @property {string} img image url of the object
          */
 
         var vm = this;
@@ -42,7 +55,7 @@
         var currentApp;
 
         /** {string} */
-        vm.baseUrl = 'http://localhost:4848';
+        vm.baseUrl = '';
 
         /** {qAppInfo[]} */
         vm.apps = [];
@@ -51,18 +64,30 @@
         vm.sheets = [];
 
         /** {qAppInfo} */
-        vm.selectedApp;
+        vm.selectedApp = null;
 
         /** {qSheetInfo} */
-        vm.selectedSheet;
-                    
+        vm.selectedSheet = null;
+
+        /** {dispObj} */
+        vm.displayItem = null;
+
+        /** {dispObj[]} */
+        vm.embeddedObjects = [];
+
+        /** {boolean} */
+        vm.showSelectionBar = true;
+
+        /** {boolean} */
+        vm.loading = false;
+
         /**
          * Create qlik config from Qlik Server URL
          * @param {string} url Qlik server base url
          * @return {qlikConfig} config Qlik config JSON
          */
         function createConfig(url) {
-            url += '/'
+            url += '/';
             var protocol = url.substring(0, url.indexOf('//') + 2);
             url = url.replace(protocol, '');
 
@@ -76,7 +101,7 @@
 
             var prefix = url;
 
-            return config = {
+            return {
                 host: hostname,
                 prefix: prefix,
                 port: port,
@@ -93,12 +118,12 @@
             var def = $q.defer();
             try {
                 qlik.getAppList(function (lst) {
-                    console.log(lst);
                     var apps = [];
                     lst.forEach(function (l) {
                         apps.push({ name: l.qDocName, id: l.qDocId });
                     });
                     def.resolve(apps);
+                    vm.loading = false;
                 }, config);
             } catch (e) {
                 def.reject(e);
@@ -111,7 +136,7 @@
         /**
          * Get list of sheets in the specified app
          * @param {qAppInfo} appInfo
-         * @param {qlikConfig} config
+         * @param {qlikConfig} [config]
          * @returns {Promise<qSheetInfo[]>}
          */
         function getSheets(appInfo, config) {
@@ -120,66 +145,170 @@
             try {
                 currentApp = qlik.openApp(appInfo.id, config);
                 currentApp.getAppObjectList('sheet', function (reply) {
-                    console.log(reply);
+
                     var sheets = [];
 
                     $.each(reply.qAppObjectList.qItems, function (key, value) {
-                        var sheet = { name: value.qData.title, objects: [] };
+                        var sheet = {
+                            name: value.qData.title,
+                            id: value.qInfo.qId,
+                            description: value.qData.description,
+                            img: value.qData.thumbnail.qStaticContentUrl.qUrl,
+                            objects: [] };
+
                         $.each(value.qData.cells, function (k, v) {
                             sheet.objects.push({ name: v.name, type: v.type });
                         });
                         sheets.push(sheet);
                     });
-                    console.log(sheets);
                     def.resolve(sheets);
                 });
             } catch (e) {
                 def.reject(e);
             }
             return def.promise;
-
-
-            //currentApp.getObjectProperties("HdVjz").then(function (model) {
-            //    console.log(model);
-            //});	
         }
 
+        /**
+         * Load properties of the specified object
+         * @param {string} obj id of the object
+         * @return {*}
+         */
+        function getObjectProperties(obj){
+            var def = $q.defer();
+            try {
+                currentApp.getObjectProperties(obj).then(function (reply) {
+                    console.log(reply);
+                    def.resolve(reply);
+                }, function(e){
+                    def.reject(e);
+                });
+            } catch (e) {
+                def.reject(e);
+            }
+            return def.promise;
+        }
 
 
         /**
          * Load list of app from Qlik Sense server
          */
         vm.loadAppList = function (url) {
+            vm.loading = true;
             qConfig = createConfig(url);
+            window.config = qConfig;
+            console.log('You can access your qlik config object as \'config\'');
+            console.log(window.config);
+
             nqi.getQlik(url).then(function (q) {
                 qlik = q;
-                window.q = q;
+                console.log('You can access qlik  as \'qlik\'');
+                window.qlik = q;
                 // load app list
                 getApps().then(function (a) {
                     vm.apps = a;
+                    vm.qlikLoaded = true;
+                    vm.loading = false;
                 }, function (e) {
                     console.log(e);
                     this.error = "Error retrieving list of sheets " + JSON.stringify(e);
+                    vm.loading = false;
                 });
 
             }, function (e) {
                 console.log(e);
                 this.error = "Error loading qlik.js. " + JSON.stringify(e);
+                vm.loading = false;
             })
         };
 
         /**
          * Load list of sheets in the selected app
          */
-        vm.loadSheets = function (appinfo) {
-            vm.selectedApp = appinfo;
-            getSheets(appinfo).then(function (sheets) {
+        vm.loadSheets = function (appInfo) {
+            vm.loading = true;
+            vm.selectedApp = appInfo;
+            getSheets(appInfo).then(function (sheets) {
                 vm.sheets = sheets;
                 vm.selectedSheet = vm.sheets[0];
+                if(vm.selectedSheet)
+                    vm.loadSheetProperties(vm.selectedSheet);
+                vm.loading = false;
             }, function (e) {
                 console.log(e);
                 this.error = "Error retrieving list of objects in sheet " + JSON.stringify(e);
+                vm.loading = true;
             });
-        }
+        };
 
-    }])
+        /**
+         * Load properties of object
+         * @param obj {qObject}
+         */
+        vm.loadObjectProperties = function (obj) {
+            vm.loading = true;
+            vm.selectedObject=obj;
+            getObjectProperties(obj.name).then(function(d){
+                var title = (typeof d.properties.title === 'string') ?
+                    d.properties.title : d.properties.visualization;
+                vm.displayItem = {};
+                vm.displayItem.title = title || d.properties.visualization;
+                vm.displayItem.type = d.properties.visualization;
+                vm.displayItem.id = d.id;
+                vm.displayItem.appId = currentApp.id;
+                vm.loading = false;
+            }, function (e) {
+                console.log(e);
+                this.error = "Error retrieving object properties " + obj +'. ' + JSON.stringify(e);
+                vm.loading = false;
+            });
+        };
+
+        /**
+         * Load properties of sheet
+         * @param sheet {qSheetInfo}
+         */
+        vm.loadSheetProperties = function (sheet) {
+            vm.selectedSheet = sheet;
+            vm.displayItem = {};
+            vm.displayItem.title = sheet.name;
+            vm.displayItem.type = 'sheet';
+            vm.displayItem.id = sheet.id;
+            vm.displayItem.description = sheet.description;
+            vm.displayItem.appId = currentApp.id;
+            vm.displayItem.img = sheet.img ? vm.baseUrl + sheet.img : '';
+        };
+
+        /**
+         * Embed the given object in the web page
+         * @param obj {qObject}
+         */
+        vm.embedObject = function(obj){
+            var toEmbed = {
+                title: obj.title,
+                id: obj.id,
+                appId: currentApp.id,
+                baseUrl: vm.baseUrl,
+                type: obj.type,
+                isSheet: obj.type === 'sheet',
+                isObject: obj.type !== 'sheet',
+                showSelectionBar: vm.showSelectionBar
+            };
+            vm.embeddedObjects.push(toEmbed);
+        };
+
+        /**
+         * Embed a selection bar
+         */
+        vm.addSelectionBar = function(){
+            var toEmbed = {
+                title: 'selection bar',
+                appId: currentApp.id,
+                baseUrl: vm.baseUrl,
+                type: 'selection bar',
+                isSheet: false,
+                isSelectionBar: true
+            };
+            vm.embeddedObjects.push(toEmbed);
+        }
+    }]);
