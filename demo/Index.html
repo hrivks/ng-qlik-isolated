@@ -23,7 +23,7 @@
     <script src="app.js"></script>
 </head>
 <body>
-<div class="container" ng-app="app" ng-controller="HomeCtrl as home">
+<div class="container" ng-app="app" ng-controller="HomeCtrl as home" ng-cloak="">
     <div class="jumbotron" style="margin-top:15px;">
         <h1>qlik-isolated demo</h1>
         <p><em>Load Qlik Sense's qlik.js in an isolated, non-conflicting way and embed Qlik Sense
@@ -44,6 +44,7 @@
     <div class="row">
         <div class="col-xs-11">
             <input type="text" class="form-control" ng-model="home.baseUrl"
+                   ng-keypress="$event.keyCode === 13 && home.loadAppList(home.baseUrl)"
                    placeholder="Enter your Qlik Server URL"/>
         </div>
         <div class="col-xs-1">
@@ -86,8 +87,8 @@
                         <span class="caret pull-right" style="margin-top:10px"></span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
-                        <li ng-repeat="app in home.apps"><a href="#"
-                                                            ng-click="home.loadSheets(app)">{{app.name}}</a>
+                        <li ng-repeat="app in home.apps">
+                            <a href="#" ng-click="home.loadSheets(app)">{{app.name}}</a>
                         </li>
                     </ul>
                 </div> <!--/App dropdown-->
@@ -98,11 +99,15 @@
                             style="text-align:left" type="button" id="sheetDropdown"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         <span class="caret pull-right" style="margin-top:10px"></span>
-                        <span class="pull-left"> {{ home.selectedSheet ? home.selectedSheet.name : 'Select Sheet' }}</span>
+                        <span class="pull-left">
+                            {{ home.selectedSheet ? home.selectedSheet.name : 'Select Sheet' }}
+                        </span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="app-selection-dropdown">
-                        <li ng-repeat="sheet in home.sheets"><a href="#"
-                                                                ng-click="home.loadSheetProperties(sheet)">{{sheet.name}}</a>
+                        <li ng-repeat="sheet in home.sheets">
+                            <a href="#" ng-click="home.loadSheetProperties(sheet)">
+                                {{sheet.name}}
+                            </a>
                         </li>
                     </ul>
                 </div> <!--/App dropdown-->
@@ -164,8 +169,8 @@
                         <div class="row">
                             <div class="col-xs-12 text-right">
                                 <small>
-                                <input type="checkbox"
-                                       ng-model="home.showSelectionBar"/> with selection bar
+                                    <input type="checkbox"
+                                           ng-model="home.showSelectionBar"/> with selection bar
                                 </small>
                             </div>
                         </div>
@@ -217,6 +222,44 @@
         </div> <!--/content-->
     </div>
 </div>
-<div style="height:30px;width:100%;"></div>
+<div class="navbar-fixed-bottom">
+    <ul class="nav nav-pills nav-stacked pull-right">
+        <li>
+            <a href="http://meetvikas.net" title="about me: Hari Vikas Janarthanan" target="_blank">
+                <span class="glyphicon glyphicon-user"></span>
+            </a>
+        </li>
+        <li>
+            <a href="https://github.com/hrivks" title="my github" target="_blank">
+                <span class="glyphicon glyphicon-console"></span>
+            </a>
+        </li>
+        <li>
+            <a href="mailto:hrivks@gmail.com" title="shoot me an email" target="_blank">
+                <span class="glyphicon glyphicon-envelope"></span>
+            </a>
+        </li>
+    </ul>
+</div>
+<div style="height:30px;width:100%;">
+
+</div>
+<!-- GA -->
+<script>
+    (function (i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function () {
+            (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-43791818-2', 'auto');
+    ga('send', 'pageview', {'dimension1': 'qlik-isolated'});
+</script>
 </body>
 </html>

@@ -200,8 +200,10 @@
             var def = $q.defer(); // $q to bring e into angular contextual
             def.resolve(err);
             def.promise.then(function (e) {
-                vm.error = "Oops! Qlik error occured. Message: " + e.message + ". Code: " + e.code;
+                vm.error = 'Oops! Qlik error occured. Message: '
+                    + e.message || '' + '. Code: ' + e.code || '';
             });
+            vm.loading = false;
         }
 
         /**
@@ -239,11 +241,10 @@
                 console.log(e);
                 vm.error = "Error loading qlik.js. Make sure Qlik server URL is working. "
                     + " If you are connecting to Qlik Desktop (http://localhost:4848), "
-                    + " make sure it is open. " + JSON.stringify(e);
+                    + " make sure the application is running. Error : " + JSON.stringify(e);
                 vm.loading = false;
             });
         };
-
 
         /**
          * Load list of sheets in the selected app
