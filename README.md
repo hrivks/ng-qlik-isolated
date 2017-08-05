@@ -2,7 +2,7 @@
 
 Angular wrapper for [qlik-isolated.js](https://github.com/hrivks/qlik-isolated)
 
-#### [live demo](http://meetvikas.net/misc/qlik-isolated/demo/Index.html) 
+### :zap: [live demo](http://meetvikas.net/misc/qlik-isolated/demo/Index.html) :zap:
  
 ### Installation
 ---
