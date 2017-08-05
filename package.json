@@ -1,6 +1,6 @@
 {
   "name": "ng-qlik-isolated",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Angular wrapper for qlik-isolated.js",
   "main": "index.js",
   "scripts": {
