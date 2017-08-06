@@ -214,6 +214,7 @@
             if (!url)
                 return;
             vm.loading = true;
+			vm.error = '';
             qConfig = createConfig(url);
             window.config = qConfig;
             console.log('You can access your qlik config object as \'config\'', config);
